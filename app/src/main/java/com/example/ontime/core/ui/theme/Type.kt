@@ -1,4 +1,4 @@
-package com.example.ontime.ui.theme
+package com.example.ontime.core.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
