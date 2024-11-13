@@ -11,8 +11,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.minus
+import javax.inject.Inject
 
-class RunningRoutineViewModel(
+class RunningRoutineViewModel @Inject constructor(
     private val repository: RunningRoutineRepository
 ) : ViewModel() {
 
