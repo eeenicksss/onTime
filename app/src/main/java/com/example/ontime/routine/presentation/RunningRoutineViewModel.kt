@@ -1,19 +1,21 @@
 package com.example.ontime.routine.presentation
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ontime.routine.domain.usecase.GetTasksUseCase
 import com.example.ontime.routine.domain.usecase.SaveTasksUseCase
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RunningRoutineViewModel(
+class RunningRoutineViewModel @Inject constructor(
     private val getTasksUseCase: GetTasksUseCase,
     private val saveTasksUseCase: SaveTasksUseCase
 ) : ViewModel() {
 
-    private val _tasks = mutableStateOf<List<Task>>(emptyList())
-    val tasks = _tasks
+    private val _tasks = MutableStateFlow<List<Task>>(emptyList())
+    val tasks: StateFlow<List<Task>> = _tasks
 
     init {
         loadTasks()
@@ -30,6 +32,7 @@ class RunningRoutineViewModel(
     fun saveTasks(tasks: List<Task>) {
         viewModelScope.launch {
             saveTasksUseCase.execute(tasks)  // Сохраняем задачи
+            _tasks.value = tasks
         }
     }
 

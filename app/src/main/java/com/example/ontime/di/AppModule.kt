@@ -6,12 +6,17 @@ import com.example.ontime.routine.data.RunningRoutineRepositoryImpl
 import com.example.ontime.routine.domain.repository.RunningRoutineRepository
 import com.example.ontime.routine.domain.usecase.GetTasksUseCase
 import com.example.ontime.routine.domain.usecase.SaveTasksUseCase
+import com.example.ontime.routine.presentation.RunningRoutineViewModelFactory
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
 
 @Module
-class AppModule {
+class AppModule(private val context: Context) {
+
+    @Provides
+    @Singleton
+    fun provideContext(): Context = context
 
     @Provides
     @Singleton
@@ -35,5 +40,14 @@ class AppModule {
     @Singleton
     fun provideSaveTasksUseCase(repository: RunningRoutineRepository): SaveTasksUseCase {
         return SaveTasksUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRunningRoutineViewModelFactory(
+        getTasksUseCase: GetTasksUseCase,
+        saveTasksUseCase: SaveTasksUseCase
+    ): RunningRoutineViewModelFactory {
+        return RunningRoutineViewModelFactory(getTasksUseCase, saveTasksUseCase)
     }
 }
