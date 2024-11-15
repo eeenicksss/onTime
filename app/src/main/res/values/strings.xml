@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">onTime</string>
+    <string name="choose_start_time">Выбери время начала</string>
+    <string name="ok">ОК</string>
+    <string name="dismiss">Отмена</string>
+    <string name="finish">Завершить рутину</string>
+    <string name="complete">Выполнить</string>
+    <string name="skip">Пропустить</string>
 </resources>

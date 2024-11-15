@@ -13,7 +13,7 @@ class RunningRoutineViewModelFactory @Inject constructor(
 
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RunningRoutineViewModel::class.java)) {
-            return RunningRoutineViewModel(getTasksUseCase, saveTasksUseCase) as T
+            return RunningRoutineViewModel(getTasksUseCase, saveTasksUseCase, RunningRoutineUiState()) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
