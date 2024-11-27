@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,6 +21,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -93,7 +96,7 @@ fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
         TimeBar(
             startTime = startTime.toInstant(TimeZone.currentSystemDefault()),
             totalTime = viewModel.getRoutineTotalTime(),
-            accentColor = colorResource(id = R.color.gray)//TODO change with accent color
+            accentColorPair = colorResource(id = R.color.gray) to colorResource(R.color.light) //TODO change with accent color
         )
 
         if (showStartTimePicker) {
@@ -117,7 +120,7 @@ fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
         )
         BottomAction(
             task = viewModel.currentTask(),
-            accentColor = colorResource(id = R.color.gray), //TODO change with accent color
+            accentColorPair = colorResource(id = R.color.gray) to colorResource(R.color.light), //TODO change with accent color
             onFinishClick = { viewModel.finishRoutine() },
             onSkipClick = { viewModel.currentTaskAction(TaskStatus.SKIPPED) },
             onCompleteClick = { viewModel.currentTaskAction(TaskStatus.COMPLETED) }
@@ -180,7 +183,7 @@ fun TaskItem(task: Task, onToggleTask: (Task) -> Unit) {
 @Composable
 fun BottomAction(
     task: Task?,
-    accentColor: Color,
+    accentColorPair: Pair<Color, Color>,
     onFinishClick: () -> Unit,
     onSkipClick: () -> Unit,
     onCompleteClick: () -> Unit
@@ -190,7 +193,7 @@ fun BottomAction(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(accentColor),
+            .background(accentColorPair.first),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (task != null) {
@@ -201,15 +204,19 @@ fun BottomAction(
                     .padding(start = 16.dp, end = 16.dp, top = 28.dp),
                 textAlign = TextAlign.Center,
                 fontSize = 36.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = accentColorPair.second
             )
             Row (
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 20.dp)) {
-                OutlinedButton(onClick = onSkipClick, modifier = Modifier.weight(1f)) {
-                    Text(text = stringResource(id = R.string.skip)
-                    )
+                OutlinedButton(
+                    onClick = onSkipClick,
+                    modifier = Modifier.weight(1f),
+                    border = BorderStroke(2.dp, accentColorPair.second)
+                ) {
+                    Text(text = stringResource(id = R.string.skip), color = accentColorPair.second)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(onClick = onCompleteClick, modifier = Modifier.weight(1f)) {
@@ -220,10 +227,14 @@ fun BottomAction(
             }
         }
         else {
-            Button( onClick = onFinishClick,
-                modifier = Modifier.padding(16.dp).fillMaxWidth() ) {
+            Button(
+                onClick = onFinishClick,
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = accentColorPair.second)
+            ) {
                 Text(
-                    text = stringResource(id = R.string.finish)
+                    text = stringResource(id = R.string.finish),
+                    color = accentColorPair.first
                 )
             }
         }
@@ -232,7 +243,7 @@ fun BottomAction(
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun TimeBar(startTime: Instant, totalTime: Int, accentColor: Color) {
+fun TimeBar(startTime: Instant, totalTime: Int, accentColorPair: Pair<Color, Color>) {
     // Переменная для хранения прошедшего времени в секундах
     var secondsElapsed by remember { mutableStateOf(0) }
 
@@ -268,7 +279,7 @@ fun TimeBar(startTime: Instant, totalTime: Int, accentColor: Color) {
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(accentColor),
+            .background(accentColorPair.first),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ){
@@ -276,7 +287,8 @@ fun TimeBar(startTime: Instant, totalTime: Int, accentColor: Color) {
             text = "$timeText / $totalTimeText",
             fontSize = 36.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            color = accentColorPair.second
         )
     }
 
@@ -302,6 +314,6 @@ fun previewRunningRoutineViewModel(): RunningRoutineViewModel {
             Task("Ну и последняя задача", durationMins = 10, status = TaskStatus.SKIPPED),
             Task("Точно нет", durationMins = 3, status = TaskStatus.INCOMPLETED),
             Task("Вот последняя задача", durationMins = 26, status = TaskStatus.INCOMPLETED)
-        ))//FIXME: There's piece of s*t for just testing UI. should update project stucture
+        ))
     )
 }
