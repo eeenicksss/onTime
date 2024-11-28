@@ -1,14 +1,14 @@
 package com.example.ontime.routine.presentation
 
+import android.util.Log
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TimePickerState
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ontime.R
 import com.example.ontime.routine.domain.repository.RunningRoutineRepository
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -31,13 +31,17 @@ class RunningRoutineViewModel @Inject constructor(
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks
 
+    private val _secondsElapsed = MutableStateFlow(0)
+    val secondsElapsed: StateFlow<Int> = _secondsElapsed
+
     init {
         viewModelScope.launch(dispatcher) { // Используем заданный диспетчер
             loadTasks()
-            _uiState.value = _uiState.value.copy(
-                tasks = _tasks.value,
-                currentTask = getCurrentTask()
-            )
+            startTimer()
+//            _uiState.value = _uiState.value.copy(
+//                tasks = _tasks.value,
+//                currentTask = getCurrentTask()
+//            )
         }
     }
 
@@ -45,6 +49,17 @@ class RunningRoutineViewModel @Inject constructor(
         val loadedTasks = repository.loadTasks()
         _tasks.value = loadedTasks
         _uiState.value = _uiState.value.copy(tasks = loadedTasks, currentTask = getCurrentTask())
+    }
+
+    private fun startTimer() {
+        val startTime = _uiState.value.startTime.toInstant(TimeZone.currentSystemDefault())
+        viewModelScope.launch(dispatcher) {
+            while(true) {
+                val elapsedMillis = Clock.System.now().toEpochMilliseconds() - startTime.toEpochMilliseconds()
+                _secondsElapsed.value = (elapsedMillis / 1000).toInt()
+                delay(1000L)
+            }
+        }
     }
 
     private fun saveTasks(tasks: List<Task>) {
@@ -78,19 +93,22 @@ class RunningRoutineViewModel @Inject constructor(
 
     private fun getAnticipatedTime(): Int {
         var time = 0
-        uiState.value.tasks.forEach() {
-            if (it.status != TaskStatus.INCOMPLETED) time += it.durationMins
+        uiState.value.tasks.forEach { task ->
+            if (task.status != TaskStatus.INCOMPLETED) {
+                time += task.durationMins
+                Log.d("DEBUG", "Adding task duration: ${task.durationMins}, total: $time")
+            }
         }
+        Log.d("DEBUG", "Final anticipatedTime: $time")
         return time
     }
 
-    fun getAccentColorIdPair(startTime: Instant): Pair<Int, Int> {
+    fun getAccentColorIdPair(): Pair<Int, Int> {
         val anticipatedTime = getAnticipatedTime()
-        val elapsedTime = ((Clock.System.now().toEpochMilliseconds() - startTime.toEpochMilliseconds()) / 1000).toInt()
         val currentTaskTime = uiState.value.currentTask?.durationMins ?: 0
         return when {
-            elapsedTime <= anticipatedTime -> R.color.green to R.color.on_green
-            elapsedTime <= anticipatedTime + currentTaskTime -> R.color.gray to R.color.light
+            secondsElapsed.value <= anticipatedTime -> R.color.green to R.color.on_green
+            secondsElapsed.value <= anticipatedTime + currentTaskTime -> R.color.gray to R.color.light
             else -> R.color.red to R.color.light
         }
     }

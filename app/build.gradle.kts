@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     implementation(libs.gson)
     implementation(libs.dagger)
+    implementation(libs.androidx.navigation.compose)
     kapt(libs.dagger.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

@@ -92,9 +92,8 @@ fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
     val startTime = uiState.startTime
     //var startTime by remember { mutableStateOf(viewModel.uiState.startTime)}
     var showStartTimePicker by remember { mutableStateOf(false)}
-    val accentColorPair = viewModel.getAccentColorIdPair(
-        startTime.toInstant(TimeZone.currentSystemDefault())
-    ).let { colorResource(id = it.first) to colorResource(id = it.second) }
+    val accentColorPair = viewModel.getAccentColorIdPair()
+        .let { colorResource(id = it.first) to colorResource(id = it.second) }
 
 
     // Main layout
@@ -105,8 +104,7 @@ fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         TimeBar(
-            startTime = startTime.toInstant(TimeZone.currentSystemDefault()),
-            totalTime = viewModel.getRoutineTotalTime(),
+            viewModel = viewModel,
             accentColorPair = accentColorPair
         )
 
@@ -262,25 +260,15 @@ fun BottomAction(
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun TimeBar(startTime: Instant, totalTime: Int, accentColorPair: Pair<Color, Color>) {
+fun TimeBar(viewModel: RunningRoutineViewModel, accentColorPair: Pair<Color, Color>) {
     // Переменная для хранения прошедшего времени в секундах
-    var secondsElapsed by remember { mutableStateOf(0) }
-
-    // Обновляем `secondsElapsed` каждую секунду
-    LaunchedEffect(startTime) {
-        val startMillis = startTime.toEpochMilliseconds()
-        while (true) {
-            val nowMillis = Clock.System.now().toEpochMilliseconds()
-            secondsElapsed = ((nowMillis - startMillis) / 1000).toInt()
-            delay(1000L)
-        }
-    }
-
+    val secondsElapsed by viewModel.secondsElapsed.collectAsState()
     // Вычисляем часы, минуты и секунды
     val hours = secondsElapsed / 3600
     val minutes = (secondsElapsed % 3600) / 60
     val seconds = secondsElapsed % 60
 
+    val totalTime = viewModel.getRoutineTotalTime()
     val totalHours = totalTime / 60
     val totalMinutes = totalTime % 60
 

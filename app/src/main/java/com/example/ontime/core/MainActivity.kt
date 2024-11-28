@@ -10,7 +10,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import com.example.ontime.core.ui.theme.OnTimeTheme
+import com.example.ontime.navigation.AppNavHost
 import com.example.ontime.routine.presentation.RunningRoutineViewModel
 import javax.inject.Inject
 
@@ -24,26 +26,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             OnTimeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                setContent {
+                    val navController = rememberNavController()
+                    AppNavHost(navController = navController)
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    //TODO start developing from here
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    OnTimeTheme {
-        Greeting("Android")
     }
 }

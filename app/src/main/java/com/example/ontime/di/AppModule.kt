@@ -2,6 +2,7 @@ package com.example.ontime.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.ontime.create_routine.presentation.CreateRoutineViewModel
 import com.example.ontime.routine.data.RunningRoutineRepositoryImpl
 import com.example.ontime.routine.domain.repository.RunningRoutineRepository
 import com.example.ontime.routine.domain.usecase.GetTasksUseCase
@@ -57,5 +58,13 @@ class AppModule(private val context: Context) {
         dispatcher: CoroutineDispatcher // Передаем диспетчер
     ): RunningRoutineViewModelFactory {
         return RunningRoutineViewModelFactory(repository, dispatcher)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCreateRoutineViewModel(
+        repository: RunningRoutineRepository
+    ): CreateRoutineViewModel {
+        return CreateRoutineViewModel(repository)
     }
 }
