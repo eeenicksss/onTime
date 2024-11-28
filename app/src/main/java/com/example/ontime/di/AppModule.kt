@@ -9,6 +9,8 @@ import com.example.ontime.routine.domain.usecase.SaveTasksUseCase
 import com.example.ontime.routine.presentation.RunningRoutineViewModelFactory
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
 
 @Module
@@ -44,10 +46,16 @@ class AppModule(private val context: Context) {
 
     @Provides
     @Singleton
+    fun provideCoroutineDispatcher(): CoroutineDispatcher {
+        return Dispatchers.IO
+    }
+
+    @Provides
+    @Singleton
     fun provideRunningRoutineViewModelFactory(
-        getTasksUseCase: GetTasksUseCase,
-        saveTasksUseCase: SaveTasksUseCase
+        repository: RunningRoutineRepository,
+        dispatcher: CoroutineDispatcher // Передаем диспетчер
     ): RunningRoutineViewModelFactory {
-        return RunningRoutineViewModelFactory(getTasksUseCase, saveTasksUseCase)
+        return RunningRoutineViewModelFactory(repository, dispatcher)
     }
 }

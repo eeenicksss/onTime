@@ -9,7 +9,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,11 +20,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,8 +48,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.ontime.R
 import com.example.ontime.core.ui.theme.OnTimeTheme
 import com.example.ontime.di.AppComponent
+import com.example.ontime.routine.domain.repository.FakeRunningRoutineRepository
 import com.example.ontime.routine.domain.usecase.FakeGetTasksUseCase
 import com.example.ontime.routine.domain.usecase.FakeSaveTasksUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
@@ -63,10 +62,15 @@ class RunningRoutineActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Получаем зависимости из AppComponent
+        val repository = AppComponent.instance.provideRunningRoutineRepository()
+        val dispatcher = AppComponent.instance.provideCoroutineDispatcher()
+
         // Создаём экземпляр фабрики
         val factory = RunningRoutineViewModelFactory(
-            getTasksUseCase = AppComponent.instance.provideGetTasksUseCase(),
-            saveTasksUseCase = AppComponent.instance.provideSaveTasksUseCase()
+            repository = repository,
+            dispatcher = dispatcher
         )
 
         // Инжектируем зависимости в фабрику
@@ -83,8 +87,15 @@ class RunningRoutineActivity : ComponentActivity() {
 @Composable
 fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
     val tasks by viewModel.tasks.collectAsState() // Observing tasks state
-    var startTime by remember { mutableStateOf(viewModel.uiState.startTime)}
+    val uiState by viewModel.uiState.collectAsState()
+
+    val startTime = uiState.startTime
+    //var startTime by remember { mutableStateOf(viewModel.uiState.startTime)}
     var showStartTimePicker by remember { mutableStateOf(false)}
+    val accentColorPair = viewModel.getAccentColorIdPair(
+        startTime.toInstant(TimeZone.currentSystemDefault())
+    ).let { colorResource(id = it.first) to colorResource(id = it.second) }
+
 
     // Main layout
     Column(
@@ -96,15 +107,13 @@ fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
         TimeBar(
             startTime = startTime.toInstant(TimeZone.currentSystemDefault()),
             totalTime = viewModel.getRoutineTotalTime(),
-            accentColorPair = colorResource(id = R.color.gray) to colorResource(R.color.light) //TODO change with accent color
+            accentColorPair = accentColorPair
         )
 
         if (showStartTimePicker) {
             StartTimePicker(
-                onConfirm = {
-                    viewModel.uiState = viewModel.uiState.copy(
-                        startTime = viewModel.timePickerStateToLocalDateTime(it)
-                    )
+                onConfirm = {selectedTime ->
+                    viewModel.updateStartTime(viewModel.timePickerStateToLocalDateTime(selectedTime))
                 },
                 onDismiss = { showStartTimePicker = false },
                 initialHour = startTime.hour,
@@ -116,14 +125,19 @@ fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
         TaskList(
             modifier = Modifier.weight(1f),
             tasks = tasks,
-            onToggleTask = { task -> viewModel.toggleTask(task) }
+            onToggleTask = { task ->
+                viewModel.toggleTask(task)
+            }
         )
         BottomAction(
-            task = viewModel.currentTask(),
-            accentColorPair = colorResource(id = R.color.gray) to colorResource(R.color.light), //TODO change with accent color
+            task = uiState.currentTask,
+            accentColorPair = accentColorPair,
             onFinishClick = { viewModel.finishRoutine() },
-            onSkipClick = { viewModel.currentTaskAction(TaskStatus.SKIPPED) },
-            onCompleteClick = { viewModel.currentTaskAction(TaskStatus.COMPLETED) }
+            onSkipClick = { viewModel.setCurrentTaskStatus(TaskStatus.SKIPPED) },
+            //onCompleteClick = { viewModel.setCurrentTaskStatus(TaskStatus.COMPLETED) },
+            onCompleteClick = {
+                if (uiState.currentTask != null) viewModel.toggleTask(uiState.currentTask!!)
+            }
         )
     }
 }
@@ -159,7 +173,7 @@ fun TaskItem(task: Task, onToggleTask: (Task) -> Unit) {
             TaskStatus.COMPLETED -> painterResource(R.drawable.completed)
             TaskStatus.SKIPPED -> painterResource(R.drawable.skipped)
         }
-        Image(painter, null, modifier = Modifier.clickable { onToggleTask })
+        Image(painter, null, modifier = Modifier.clickable { onToggleTask(task) })
 
         Text(
             text = task.title,
@@ -219,9 +233,14 @@ fun BottomAction(
                     Text(text = stringResource(id = R.string.skip), color = accentColorPair.second)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
-                Button(onClick = onCompleteClick, modifier = Modifier.weight(1f)) {
+                Button(
+                    onClick = onCompleteClick,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(containerColor = accentColorPair.second)
+                ) {
                     Text(
-                        text = stringResource(id = R.string.complete)
+                        text = stringResource(id = R.string.complete),
+                        color = accentColorPair.first
                     )
                 }
             }
@@ -294,26 +313,9 @@ fun TimeBar(startTime: Instant, totalTime: Int, accentColorPair: Pair<Color, Col
 
 }
 
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun RunningRoutineScreenPreview() {
-    OnTimeTheme {
-        RunningRoutineScreen(viewModel = previewRunningRoutineViewModel())
-    }
-}
-
-@Composable
-fun previewRunningRoutineViewModel(): RunningRoutineViewModel {
-    // Используем фиктивные реализации use-case
-    return RunningRoutineViewModel(
-        getTasksUseCase = FakeGetTasksUseCase(),
-        saveTasksUseCase = FakeSaveTasksUseCase(),
-        uiState = RunningRoutineUiState(tasks = listOf(
-            Task("Очень длинная задача", durationMins = 1, status = TaskStatus.COMPLETED),
-            Task("Просто задача", durationMins = 8, status = TaskStatus.INCOMPLETED),
-            Task("Ну и последняя задача", durationMins = 10, status = TaskStatus.SKIPPED),
-            Task("Точно нет", durationMins = 3, status = TaskStatus.INCOMPLETED),
-            Task("Вот последняя задача", durationMins = 26, status = TaskStatus.INCOMPLETED)
-        ))
-    )
+    val viewModel = RunningRoutineViewModel(FakeRunningRoutineRepository(), Dispatchers.IO)
+    RunningRoutineScreen(viewModel = viewModel)
 }
