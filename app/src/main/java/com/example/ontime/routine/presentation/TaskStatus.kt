@@ -1,7 +1,7 @@
 package com.example.ontime.routine.presentation
 
 enum class TaskStatus {
-    INCOMPLETED,
+    UNCOMPLETED,
     COMPLETED,
     SKIPPED
 }

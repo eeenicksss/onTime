@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,34 +45,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import com.example.ontime.R
-import com.example.ontime.core.ui.theme.OnTimeTheme
 import com.example.ontime.di.AppComponent
 import com.example.ontime.routine.domain.repository.FakeRunningRoutineRepository
-import com.example.ontime.routine.domain.usecase.FakeGetTasksUseCase
-import com.example.ontime.routine.domain.usecase.FakeSaveTasksUseCase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
 
 class RunningRoutineActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Получаем зависимости из AppComponent
         val repository = AppComponent.instance.provideRunningRoutineRepository()
         val dispatcher = AppComponent.instance.provideCoroutineDispatcher()
-
-        // Создаём экземпляр фабрики
         val factory = RunningRoutineViewModelFactory(
             repository = repository,
             dispatcher = dispatcher
         )
-
-        // Инжектируем зависимости в фабрику
         AppComponent.instance.inject(factory)
         val viewModel = ViewModelProvider(this, factory).get(RunningRoutineViewModel::class.java)
 
@@ -87,27 +72,24 @@ class RunningRoutineActivity : ComponentActivity() {
 @Composable
 fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
     val tasks by viewModel.tasks.collectAsState() // Observing tasks state
-    val uiState by viewModel.uiState.collectAsState()
-
-    val startTime = uiState.startTime
-    //var startTime by remember { mutableStateOf(viewModel.uiState.startTime)}
+    val currentTask by viewModel.currentTask.collectAsState()
+    val startTime by viewModel.startTime.collectAsState()
+    val secondsElapsed by viewModel.secondsElapsed.collectAsState()
+    val accentColorIdPair by viewModel.accentColorIdPair.collectAsState()
     var showStartTimePicker by remember { mutableStateOf(false)}
-    val accentColorPair = viewModel.getAccentColorIdPair()
-        .let { colorResource(id = it.first) to colorResource(id = it.second) }
 
-
-    // Main layout
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(id = R.color.background)),
+            .background(colorResource(id = R.color.background))
+            .systemBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         TimeBar(
-            viewModel = viewModel,
-            accentColorPair = accentColorPair
+            secondsElapsed = secondsElapsed,
+            accentColorIdPair = accentColorIdPair,
+            totalTime = viewModel.getRoutineTotalTime()
         )
-
         if (showStartTimePicker) {
             StartTimePicker(
                 onConfirm = {selectedTime ->
@@ -118,8 +100,6 @@ fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
                 initialMinute = startTime.minute
             )
         }
-
-        // Task List
         TaskList(
             modifier = Modifier.weight(1f),
             tasks = tasks,
@@ -128,20 +108,21 @@ fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
             }
         )
         BottomAction(
-            task = uiState.currentTask,
-            accentColorPair = accentColorPair,
+            accentColorIdPair = accentColorIdPair,
+            currentTask = currentTask,
             onFinishClick = { viewModel.finishRoutine() },
-            onSkipClick = { viewModel.setCurrentTaskStatus(TaskStatus.SKIPPED) },
-            //onCompleteClick = { viewModel.setCurrentTaskStatus(TaskStatus.COMPLETED) },
-            onCompleteClick = {
-                if (uiState.currentTask != null) viewModel.toggleTask(uiState.currentTask!!)
-            }
+            onSkipClick = { if (currentTask != null) viewModel.setTaskStatus(currentTask!!, TaskStatus.SKIPPED)},
+            onCompleteClick = { if (currentTask != null) viewModel.setTaskStatus(currentTask!!, TaskStatus.COMPLETED) }
         )
     }
 }
 
 @Composable
-fun TaskList(modifier: Modifier = Modifier, tasks: List<Task>, onToggleTask: (Task) -> Unit) {
+fun TaskList(
+    tasks: List<Task>,
+    onToggleTask: (Task) -> Unit,
+    modifier: Modifier = Modifier
+) {
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
@@ -154,7 +135,10 @@ fun TaskList(modifier: Modifier = Modifier, tasks: List<Task>, onToggleTask: (Ta
 }
 
 @Composable
-fun TaskItem(task: Task, onToggleTask: (Task) -> Unit) {
+fun TaskItem(
+    task: Task,
+    onToggleTask: (Task) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -165,14 +149,12 @@ fun TaskItem(task: Task, onToggleTask: (Task) -> Unit) {
     ) {
         val textColor = if (task.status == TaskStatus.COMPLETED) colorResource(id = R.color.gray)
         else colorResource(id = R.color.light)
-
         val painter = when (task.status){
-            TaskStatus.INCOMPLETED -> painterResource(R.drawable.incompleted)
+            TaskStatus.UNCOMPLETED -> painterResource(R.drawable.incompleted)
             TaskStatus.COMPLETED -> painterResource(R.drawable.completed)
             TaskStatus.SKIPPED -> painterResource(R.drawable.skipped)
         }
         Image(painter, null, modifier = Modifier.clickable { onToggleTask(task) })
-
         Text(
             text = task.title,
             color = textColor,
@@ -180,10 +162,7 @@ fun TaskItem(task: Task, onToggleTask: (Task) -> Unit) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-
         Spacer(modifier = Modifier.weight(1f))
-
-        // Task duration
         Text(
             text = "${task.durationMins} мин",
             color = textColor,
@@ -194,8 +173,8 @@ fun TaskItem(task: Task, onToggleTask: (Task) -> Unit) {
 
 @Composable
 fun BottomAction(
-    task: Task?,
-    accentColorPair: Pair<Color, Color>,
+    accentColorIdPair: Pair<Int, Int>,
+    currentTask: Task?,
     onFinishClick: () -> Unit,
     onSkipClick: () -> Unit,
     onCompleteClick: () -> Unit
@@ -205,19 +184,19 @@ fun BottomAction(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(20.dp))
-            .background(accentColorPair.first),
+            .background(colorResource(accentColorIdPair.first)),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (task != null) {
+        if (currentTask!= null) {
             Text(
-                text = task.title,
+                text = currentTask.title,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, top = 28.dp),
                 textAlign = TextAlign.Center,
                 fontSize = 36.sp,
                 fontWeight = FontWeight.Bold,
-                color = accentColorPair.second
+                color = colorResource(accentColorIdPair.second)
             )
             Row (
                 modifier = Modifier
@@ -226,19 +205,24 @@ fun BottomAction(
                 OutlinedButton(
                     onClick = onSkipClick,
                     modifier = Modifier.weight(1f),
-                    border = BorderStroke(2.dp, accentColorPair.second)
+                    border = BorderStroke(2.dp, colorResource(accentColorIdPair.second))
                 ) {
-                    Text(text = stringResource(id = R.string.skip), color = accentColorPair.second)
+                    Text(
+                        text = stringResource(id = R.string.skip),
+                        color = colorResource(accentColorIdPair.second)
+                    )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(
                     onClick = onCompleteClick,
                     modifier = Modifier.weight(1f),
-                    colors = ButtonDefaults.buttonColors(containerColor = accentColorPair.second)
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(accentColorIdPair.second)
+                    )
                 ) {
                     Text(
                         text = stringResource(id = R.string.complete),
-                        color = accentColorPair.first
+                        color = colorResource(accentColorIdPair.first)
                     )
                 }
             }
@@ -247,11 +231,13 @@ fun BottomAction(
             Button(
                 onClick = onFinishClick,
                 modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = accentColorPair.second)
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(accentColorIdPair.second)
+                )
             ) {
                 Text(
                     text = stringResource(id = R.string.finish),
-                    color = accentColorPair.first
+                    color = colorResource(accentColorIdPair.first)
                 )
             }
         }
@@ -260,24 +246,22 @@ fun BottomAction(
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun TimeBar(viewModel: RunningRoutineViewModel, accentColorPair: Pair<Color, Color>) {
-    // Переменная для хранения прошедшего времени в секундах
-    val secondsElapsed by viewModel.secondsElapsed.collectAsState()
-    // Вычисляем часы, минуты и секунды
+fun TimeBar(
+    secondsElapsed: Int,
+    accentColorIdPair: Pair<Int, Int>,
+    totalTime: Int
+) {
+
     val hours = secondsElapsed / 3600
     val minutes = (secondsElapsed % 3600) / 60
     val seconds = secondsElapsed % 60
 
-    val totalTime = viewModel.getRoutineTotalTime()
     val totalHours = totalTime / 60
     val totalMinutes = totalTime % 60
 
-    // Форматируем строку времени
-    val timeText = if (hours > 0) {
-        String.format("%d:%02d:%02d", hours, minutes, seconds)
-    } else {
-        String.format("%d:%02d", minutes, seconds)
-    }
+    val timeText = if (hours > 0) String.format("%d:%02d:%02d", hours, minutes, seconds)
+    else String.format("%d:%02d", minutes, seconds)
+
     val totalTimeText = if (totalHours > 0) String.format("%d:%02d:00", totalHours, totalMinutes)
     else String.format("%d:00", totalMinutes)
 
@@ -286,7 +270,7 @@ fun TimeBar(viewModel: RunningRoutineViewModel, accentColorPair: Pair<Color, Col
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(20.dp))
-            .background(accentColorPair.first),
+            .background(colorResource(accentColorIdPair.first)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ){
@@ -295,7 +279,7 @@ fun TimeBar(viewModel: RunningRoutineViewModel, accentColorPair: Pair<Color, Col
             fontSize = 36.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(16.dp),
-            color = accentColorPair.second
+            color = colorResource(accentColorIdPair.second)
         )
     }
 

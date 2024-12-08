@@ -7,11 +7,11 @@ class FakeRunningRoutineRepository : RunningRoutineRepository {
     override suspend fun loadTasks(): List<Task> {
         // Возвращаем список задач для превью
         return listOf(
-            Task("Очень длинная задача", durationMins = 1, status = TaskStatus.INCOMPLETED),
-            Task("Просто задача", durationMins = 8, status = TaskStatus.INCOMPLETED),
-            Task("Ну и последняя задача", durationMins = 10, status = TaskStatus.INCOMPLETED),
-            Task("Точно нет", durationMins = 3, status = TaskStatus.INCOMPLETED),
-            Task("Вот последняя задача", durationMins = 26, status = TaskStatus.INCOMPLETED)
+            Task("Очень длинная задача", durationMins = 1, status = TaskStatus.UNCOMPLETED),
+            Task("Просто задача", durationMins = 8, status = TaskStatus.UNCOMPLETED),
+            Task("Ну и последняя задача", durationMins = 10, status = TaskStatus.UNCOMPLETED),
+            Task("Точно нет", durationMins = 3, status = TaskStatus.UNCOMPLETED),
+            Task("Вот последняя задача", durationMins = 26, status = TaskStatus.UNCOMPLETED)
         )
     }
 

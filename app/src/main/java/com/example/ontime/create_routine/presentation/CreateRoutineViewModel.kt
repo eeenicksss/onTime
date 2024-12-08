@@ -29,7 +29,7 @@ class CreateRoutineViewModel(
                     val newTask = Task(
                         title = _uiState.value.newTaskTitle,
                         durationMins = duration,
-                        status = TaskStatus.INCOMPLETED
+                        status = TaskStatus.UNCOMPLETED
                     )
                     _uiState.value = _uiState.value.copy(
                         tasks = _uiState.value.tasks + newTask,
