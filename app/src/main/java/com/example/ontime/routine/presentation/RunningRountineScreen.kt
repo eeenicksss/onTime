@@ -2,6 +2,7 @@ package com.example.ontime.routine.presentation
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -55,13 +56,16 @@ class RunningRoutineActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val repository = AppComponent.instance.provideRunningRoutineRepository()
         val dispatcher = AppComponent.instance.provideCoroutineDispatcher()
+        val routineId = intent.getStringExtra("routine_id") ?: ""
+        Log.d("RunningRoutineActivity", "Received routine_id: $routineId")
         val factory = RunningRoutineViewModelFactory(
             repository = repository,
-            dispatcher = dispatcher
+            dispatcher = dispatcher,
+            routineId = routineId
         )
         AppComponent.instance.inject(factory)
-        val viewModel = ViewModelProvider(this, factory).get(RunningRoutineViewModel::class.java)
-
+        val viewModel = ViewModelProvider(this, factory)[RunningRoutineViewModel::class.java]
+        //FIXME replace with .get(RunningRoutineViewModel::class.java) if won't work
         setContent {
             RunningRoutineScreen(viewModel = viewModel)
         }
@@ -288,6 +292,6 @@ fun TimeBar(
 @Preview
 @Composable
 fun RunningRoutineScreenPreview() {
-    val viewModel = RunningRoutineViewModel(FakeRunningRoutineRepository(), Dispatchers.IO)
+    val viewModel = RunningRoutineViewModel(FakeRunningRoutineRepository(), Dispatchers.IO, "")
     RunningRoutineScreen(viewModel = viewModel)
 }

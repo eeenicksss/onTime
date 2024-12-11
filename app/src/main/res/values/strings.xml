@@ -6,4 +6,12 @@
     <string name="finish">Завершить рутину</string>
     <string name="complete">Выполнить</string>
     <string name="skip">Пропустить</string>
+    <string name="task_title">Заголовок задачи</string>
+    <string name="task_duration">Длительность задачи (мин)</string>
+    <string name="add_task">Добавить задачу</string>
+    <string name="save_routine">Сохранить рутину</string>
+    <string name="create_routine">Новая рутина</string>
+    <string name="start">Начать</string>
+    <string name="delete">Удалить</string>
+    <string name="routine_name">Название рутины</string>
 </resources>

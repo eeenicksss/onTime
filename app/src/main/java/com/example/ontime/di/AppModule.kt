@@ -2,7 +2,9 @@ package com.example.ontime.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.ontime.create_routine.presentation.CreateRoutineViewModel
+import com.example.ontime.create.presentation.CreateRoutineViewModel
+import com.example.ontime.list.data.RoutinesListRepositoryImpl
+import com.example.ontime.list.domain.RoutinesListRepository
 import com.example.ontime.routine.data.RunningRoutineRepositoryImpl
 import com.example.ontime.routine.domain.repository.RunningRoutineRepository
 import com.example.ontime.routine.domain.usecase.GetTasksUseCase
@@ -35,8 +37,14 @@ class AppModule(private val context: Context) {
 
     @Provides
     @Singleton
-    fun provideGetTasksUseCase(repository: RunningRoutineRepository): GetTasksUseCase {
-        return GetTasksUseCase(repository)
+    fun provideRoutinesListRepository(sharedPreferences: SharedPreferences): RoutinesListRepository {
+        return RoutinesListRepositoryImpl(sharedPreferences) // Используйте реальную реализацию
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetTasksUseCase(repository: RunningRoutineRepository, routineId: String): GetTasksUseCase {
+        return GetTasksUseCase(repository, routineId)
     }
 
     @Provides
@@ -55,15 +63,16 @@ class AppModule(private val context: Context) {
     @Singleton
     fun provideRunningRoutineViewModelFactory(
         repository: RunningRoutineRepository,
-        dispatcher: CoroutineDispatcher // Передаем диспетчер
+        dispatcher: CoroutineDispatcher, // Передаем диспетчер
+        routineId: String
     ): RunningRoutineViewModelFactory {
-        return RunningRoutineViewModelFactory(repository, dispatcher)
+        return RunningRoutineViewModelFactory(repository, dispatcher, routineId)
     }
 
     @Provides
     @Singleton
     fun provideCreateRoutineViewModel(
-        repository: RunningRoutineRepository
+        repository: RoutinesListRepository
     ): CreateRoutineViewModel {
         return CreateRoutineViewModel(repository)
     }

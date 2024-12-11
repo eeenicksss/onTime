@@ -1,14 +1,13 @@
-package com.example.ontime.create_routine.presentation
+package com.example.ontime.create.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.ontime.routine.domain.repository.RunningRoutineRepository
-import javax.inject.Inject
+import com.example.ontime.list.domain.RoutinesListRepository
 
-class CreateRoutineViewModelFactory @Inject constructor(
-    private val repository: RunningRoutineRepository
+class CreateRoutineViewModelFactory(
+    private val repository: RoutinesListRepository
 ) : ViewModelProvider.Factory {
-
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(CreateRoutineViewModel::class.java)) {
             return CreateRoutineViewModel(repository) as T

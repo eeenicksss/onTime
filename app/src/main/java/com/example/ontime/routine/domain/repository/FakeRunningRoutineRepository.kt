@@ -4,7 +4,7 @@ import com.example.ontime.routine.presentation.Task
 import com.example.ontime.routine.presentation.TaskStatus
 
 class FakeRunningRoutineRepository : RunningRoutineRepository {
-    override suspend fun loadTasks(): List<Task> {
+    override suspend fun getRoutineById(routineId: String): List<Task> {
         // Возвращаем список задач для превью
         return listOf(
             Task("Очень длинная задача", durationMins = 1, status = TaskStatus.UNCOMPLETED),

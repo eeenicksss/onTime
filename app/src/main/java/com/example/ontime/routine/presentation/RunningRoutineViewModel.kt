@@ -21,7 +21,8 @@ import javax.inject.Inject
 
 class RunningRoutineViewModel @Inject constructor(
     private val repository: RunningRoutineRepository,
-    private val dispatcher: CoroutineDispatcher
+    private val dispatcher: CoroutineDispatcher,
+    private val routineId: String
 ) : ViewModel() {
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks
@@ -40,14 +41,17 @@ class RunningRoutineViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(dispatcher) { // Используем заданный диспетчер
-            loadTasks()
+            loadRoutine(routineId)
             setCurrentTask()
             startTimer()
         }
     }
 
-    private suspend fun loadTasks() {
-        _tasks.value = repository.loadTasks()
+    private fun loadRoutine(routineId: String) {
+        viewModelScope.launch(dispatcher) {
+            val tasks = repository.getRoutineById(routineId) // Загрузка рутины из репозитория
+            _tasks.value = tasks
+        }
     }
 
     private fun startTimer() {

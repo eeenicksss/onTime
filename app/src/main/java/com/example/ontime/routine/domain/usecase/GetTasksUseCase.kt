@@ -5,10 +5,10 @@ import com.example.ontime.routine.presentation.Task
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-open class GetTasksUseCase(val repository: RunningRoutineRepository) {
+open class GetTasksUseCase(val repository: RunningRoutineRepository, val routineId: String) {
     open suspend fun execute(): Flow<List<Task>> {
         return flow {
-            emit(repository.loadTasks())  // Загружаем задачи
+            emit(repository.getRoutineById(routineId))  // Загружаем задачи
         }
     }
 }

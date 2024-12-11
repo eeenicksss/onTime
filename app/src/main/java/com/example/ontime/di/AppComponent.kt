@@ -1,5 +1,6 @@
 package com.example.ontime.di
 
+import com.example.ontime.list.domain.RoutinesListRepository
 import com.example.ontime.routine.domain.repository.RunningRoutineRepository
 import com.example.ontime.routine.domain.usecase.GetTasksUseCase
 import com.example.ontime.routine.domain.usecase.SaveTasksUseCase
@@ -17,6 +18,7 @@ interface AppComponent {
     //fun provideSaveTasksUseCase(): SaveTasksUseCase
     fun provideRunningRoutineRepository(): RunningRoutineRepository
     fun provideCoroutineDispatcher(): CoroutineDispatcher
+    fun provideRoutinesListRepository(): RoutinesListRepository
 
 //    @Component.Builder
 //    interface Builder {
