@@ -1,6 +1,5 @@
 package com.example.ontime.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -22,46 +21,29 @@ fun AppNavHost(navController: NavHostController) {
     NavHost(navController = navController, startDestination = Screen.RoutinesList) {
         // Экран списка рутин
         composable(Screen.RoutinesList) {
-            // Используем ViewModelProvider для создания RoutinesListViewModel с зависимостями через Dagger
             val routinesListViewModel: RoutinesListViewModel = viewModel(
                 factory = RoutinesListViewModelFactory(
                     repository = AppComponent.instance.provideRoutinesListRepository()
-                ) // Создаем ViewModel с помощью Factory
+                )
             )
 
-//            RoutinesListScreen(
-//                viewModel = routinesListViewModel,
-//                onStartRoutineClick = {
-//                    // Переход к экрану RunningRoutine с выбранной рутиной
-//                    navController.navigate(Screen.RunningRoutine.route) {//"${Screen.RunningRoutine.route}/$routineId"
-//                        // Включаем возможность возврата на экран списка рутин
-//                        popUpTo(Screen.RoutinesList.route) { inclusive = true }
-//                    }
-//                },
-//                onCreateRoutineClick = {
-//                    // Переход к экрану создания рутины
-//                    navController.navigate(Screen.CreateRoutine.route)
-//                }
-//            )
             RoutinesListScreen(
                 viewModel = routinesListViewModel,
+                onStartRoutineClick = { routineId ->
+                    navController.navigate(Screen.createRunningRoutineRoute(routineId)) // Переход с передачей параметра
+                },
                 onCreateRoutineClick = {
                     navController.navigate(Screen.CreateRoutine)
-                },
-                onStartRoutineClick = { routineId ->
-                    Log.d("RoutinesListActivity", "Starting routine with ID: $routineId")
-                    navController.navigate(Screen.createRunningRoutineRoute(routineId))
                 }
             )
         }
 
         // Экран создания рутины
         composable(Screen.CreateRoutine) {
-            // Используем ViewModelProvider для создания CreateRoutineViewModel с зависимостями через Dagger
             val createRoutineViewModel: CreateRoutineViewModel = viewModel(
                 factory = CreateRoutineViewModelFactory(
                     repository = AppComponent.instance.provideRoutinesListRepository()
-                ) // Создаем ViewModel с помощью Factory
+                )
             )
 
             CreateRoutineScreen(
@@ -74,17 +56,22 @@ fun AppNavHost(navController: NavHostController) {
             )
         }
 
-        // Экран выполнения рутины
-        composable(Screen.RunningRoutine) {
-            // Используем ViewModelProvider для создания RunningRoutineViewModel с зависимостями через Dagger
+        // Экран выполнения рутины с параметром routine_id
+        composable(Screen.RunningRoutine) { backStackEntry ->
+            val routineId = backStackEntry.arguments?.getString("routine_id") ?: ""
             val runningRoutineViewModel: RunningRoutineViewModel = viewModel(
                 factory = RunningRoutineViewModelFactory(
                     repository = AppComponent.instance.provideRunningRoutineRepository(),
                     dispatcher = AppComponent.instance.provideCoroutineDispatcher(),
-                    routineId = it.arguments?.getString("routine_id") ?: ""
-                ) // Создаем ViewModel с помощью Factory
+                    routineId = routineId
+                )
             )
-            RunningRoutineScreen(viewModel = runningRoutineViewModel)
+            RunningRoutineScreen(
+                viewModel = runningRoutineViewModel,
+                onFinishClick = {
+                    navController.navigate(Screen.RoutinesList) {
+                }}
+            )
         }
     }
 }

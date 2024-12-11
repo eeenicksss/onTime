@@ -118,25 +118,6 @@ class RunningRoutineViewModel @Inject constructor(
         _startTime.value = newStartTime
     }
 
-    fun toTimeString(hours: Int, minutes: Int): String {
-        val hrs = hours.toString().padStart(2, '0')
-        val mins = minutes.toString().padStart(2, '0')
-        return "$hrs:$mins"
-    }
-
-    fun fromTimeString(time: String): Pair<Int, Int> {
-        // Разделяем строку по двоеточию
-        val parts = time.split(":")
-        if (parts.size != 2) throw IllegalArgumentException("Invalid time format")
-        val hours = parts[0].toInt()
-        val minutes = parts[1].toInt()
-        return hours to minutes
-    }
-
-    fun finishRoutine() {
-        //TODO create finishing routine logic
-    }
-
     @OptIn(ExperimentalMaterial3Api::class)
     fun timePickerStateToLocalDateTime(timePickerState: TimePickerState): LocalDateTime {
         // Получаем сегодняшнюю дату в текущей временной зоне

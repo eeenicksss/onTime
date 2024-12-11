@@ -1,10 +1,6 @@
 package com.example.ontime.routine.presentation
 
 import android.annotation.SuppressLint
-import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -44,37 +40,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.ViewModelProvider
 import com.example.ontime.R
-import com.example.ontime.di.AppComponent
 import com.example.ontime.routine.domain.repository.FakeRunningRoutineRepository
 import kotlinx.coroutines.Dispatchers
 
-class RunningRoutineActivity : ComponentActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val repository = AppComponent.instance.provideRunningRoutineRepository()
-        val dispatcher = AppComponent.instance.provideCoroutineDispatcher()
-        val routineId = intent.getStringExtra("routine_id") ?: ""
-        Log.d("RunningRoutineActivity", "Received routine_id: $routineId")
-        val factory = RunningRoutineViewModelFactory(
-            repository = repository,
-            dispatcher = dispatcher,
-            routineId = routineId
-        )
-        AppComponent.instance.inject(factory)
-        val viewModel = ViewModelProvider(this, factory)[RunningRoutineViewModel::class.java]
-        //FIXME replace with .get(RunningRoutineViewModel::class.java) if won't work
-        setContent {
-            RunningRoutineScreen(viewModel = viewModel)
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
+fun RunningRoutineScreen(
+    viewModel: RunningRoutineViewModel,
+    onFinishClick: () -> Unit
+) {
     val tasks by viewModel.tasks.collectAsState() // Observing tasks state
     val currentTask by viewModel.currentTask.collectAsState()
     val startTime by viewModel.startTime.collectAsState()
@@ -86,8 +61,7 @@ fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .background(colorResource(id = R.color.background))
-            .systemBarsPadding(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .systemBarsPadding()
     ) {
         TimeBar(
             secondsElapsed = secondsElapsed,
@@ -114,7 +88,7 @@ fun RunningRoutineScreen(viewModel: RunningRoutineViewModel) {
         BottomAction(
             accentColorIdPair = accentColorIdPair,
             currentTask = currentTask,
-            onFinishClick = { viewModel.finishRoutine() },
+            onFinishClick = onFinishClick,
             onSkipClick = { if (currentTask != null) viewModel.setTaskStatus(currentTask!!, TaskStatus.SKIPPED)},
             onCompleteClick = { if (currentTask != null) viewModel.setTaskStatus(currentTask!!, TaskStatus.COMPLETED) }
         )
@@ -170,7 +144,10 @@ fun TaskItem(
         Text(
             text = "${task.durationMins} мин",
             color = textColor,
-            fontSize = 14.sp
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -293,5 +270,5 @@ fun TimeBar(
 @Composable
 fun RunningRoutineScreenPreview() {
     val viewModel = RunningRoutineViewModel(FakeRunningRoutineRepository(), Dispatchers.IO, "")
-    RunningRoutineScreen(viewModel = viewModel)
+    RunningRoutineScreen(viewModel = viewModel, {})
 }
