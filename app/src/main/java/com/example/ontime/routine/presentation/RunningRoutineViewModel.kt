@@ -42,7 +42,6 @@ class RunningRoutineViewModel @Inject constructor(
     init {
         viewModelScope.launch(dispatcher) { // Используем заданный диспетчер
             loadRoutine(routineId)
-            setCurrentTask()
             startTimer()
         }
     }
@@ -51,6 +50,7 @@ class RunningRoutineViewModel @Inject constructor(
         viewModelScope.launch(dispatcher) {
             val tasks = repository.getRoutineById(routineId) // Загрузка рутины из репозитория
             _tasks.value = tasks
+            setCurrentTask()
         }
     }
 
@@ -108,7 +108,7 @@ class RunningRoutineViewModel @Inject constructor(
         val anticipatedTime = getAnticipatedTime() * 60
         val currentTaskTime = currentTask.value?.durationMins?.let{it * 60} ?: 0
         _accentColorIdPair.value = when {
-            secondsElapsed.value <= anticipatedTime -> R.color.green to R.color.on_green
+            secondsElapsed.value < anticipatedTime -> R.color.green to R.color.on_green
             secondsElapsed.value <= anticipatedTime + currentTaskTime -> R.color.gray to R.color.light
             else -> R.color.red to R.color.light
         }

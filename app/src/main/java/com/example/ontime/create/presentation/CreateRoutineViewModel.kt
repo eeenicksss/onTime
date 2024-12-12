@@ -10,24 +10,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-//// Состояние UI для экрана создания рутины
-//data class CreateRoutineUIState(
-//    val routineTitle: String = "",
-//    val newTaskTitle: String = "",
-//    val newTaskDuration: String = "",
-//    val tasks: List<Task> = emptyList()
-//)
-
-// Модель события для обработки пользовательского ввода
-//sealed class CreateRoutineEvents {
-//    data class UpdateRoutineTitle(val title: String) : CreateRoutineEvents() // Событие для обновления названия рутины
-//    data class UpdateTaskTitle(val title: String) : CreateRoutineEvents()
-//    data class UpdateTaskDuration(val duration: String) : CreateRoutineEvents()
-//    object AddTask : CreateRoutineEvents()
-//    object SubmitRoutine : CreateRoutineEvents()
-//}
-
-
 open class CreateRoutineViewModel(
     private val repository: RoutinesListRepository
 ) : ViewModel() {
