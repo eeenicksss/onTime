@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ontime.R
+import com.example.ontime.list.data.FakeRoutinesListRepository
 import com.example.ontime.routine.presentation.Task
 import com.example.ontime.routine.presentation.TaskStatus
 import kotlinx.coroutines.launch
@@ -134,7 +135,7 @@ fun CreateRoutineScreen(
 @Composable
 fun PreviewCreateRoutineScreen() {
     // Фейковый ViewModel для превью
-    val fakeViewModel = object : CreateRoutineViewModel(FakeRoutineListRepository()) {
+    val fakeViewModel = object : CreateRoutineViewModel(FakeRoutinesListRepository()) {
         init {
             // Инициализация начальных значений
             updateRoutineTitle("Morning Routine")

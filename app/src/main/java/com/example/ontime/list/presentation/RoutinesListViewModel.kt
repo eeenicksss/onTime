@@ -1,11 +1,13 @@
 package com.example.ontime.list.presentation
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ontime.list.domain.RoutinesListRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.lang.reflect.Modifier.PRIVATE
 
 class RoutinesListViewModel(
     private val repository: RoutinesListRepository
@@ -18,7 +20,8 @@ class RoutinesListViewModel(
         loadRoutines()
     }
 
-    private fun loadRoutines() {
+    @VisibleForTesting(otherwise = PRIVATE)
+    fun loadRoutines() {
         viewModelScope.launch {
             _routines.value = repository.getAllRoutines()
         }

@@ -1,5 +1,6 @@
 package com.example.ontime.routine.presentation
 
+import androidx.annotation.VisibleForTesting
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TimePickerState
 import androidx.lifecycle.ViewModel
@@ -17,12 +18,14 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import java.lang.reflect.Modifier.PRIVATE
 import javax.inject.Inject
 
 class RunningRoutineViewModel @Inject constructor(
     private val repository: RunningRoutineRepository,
     private val dispatcher: CoroutineDispatcher,
-    private val routineId: String
+    private val routineId: String,
+    private val isTimerInfinite: Boolean = true
 ) : ViewModel() {
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks
@@ -42,7 +45,7 @@ class RunningRoutineViewModel @Inject constructor(
     init {
         viewModelScope.launch(dispatcher) { // Используем заданный диспетчер
             loadRoutine(routineId)
-            startTimer()
+            startTimer(isInfinite = isTimerInfinite)
         }
     }
 
@@ -54,7 +57,7 @@ class RunningRoutineViewModel @Inject constructor(
         }
     }
 
-    private fun startTimer() {
+    private fun startTimer(isInfinite: Boolean = true) {
         val startTime = startTime.value.toInstant(TimeZone.currentSystemDefault())
         viewModelScope.launch(dispatcher) {
             while(true) {
@@ -62,6 +65,7 @@ class RunningRoutineViewModel @Inject constructor(
                 _secondsElapsed.value = (elapsedMillis / 1000).toInt()
                 setAccentColorIdPair()
                 delay(1000L)
+                if (!isInfinite && secondsElapsed.value >= 5) break
             }
         }
     }
@@ -104,6 +108,7 @@ class RunningRoutineViewModel @Inject constructor(
         return time
     }
 
+
     private fun setAccentColorIdPair() {
         val anticipatedTime = getAnticipatedTime() * 60
         val currentTaskTime = currentTask.value?.durationMins?.let{it * 60} ?: 0
@@ -133,5 +138,12 @@ class RunningRoutineViewModel @Inject constructor(
             second = 0,
             nanosecond = 0
         )
+    }
+
+    @VisibleForTesting(otherwise = PRIVATE)
+    fun setSecondsElapsed(seconds: Int) {
+        setCurrentTask()
+        _secondsElapsed.value = seconds
+        setAccentColorIdPair()
     }
 }

@@ -44,6 +44,7 @@ import com.example.ontime.R
 import com.example.ontime.routine.domain.repository.FakeRunningRoutineRepository
 import kotlinx.coroutines.Dispatchers
 
+@SuppressLint("ResourceType")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RunningRoutineScreen(
@@ -60,7 +61,7 @@ fun RunningRoutineScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(colorResource(id = R.color.background))
+            .background(colorResource(R.color.background))
             .systemBarsPadding()
     ) {
         TimeBar(
@@ -270,5 +271,5 @@ fun TimeBar(
 @Composable
 fun RunningRoutineScreenPreview() {
     val viewModel = RunningRoutineViewModel(FakeRunningRoutineRepository(), Dispatchers.IO, "")
-    RunningRoutineScreen(viewModel = viewModel, {})
+    RunningRoutineScreen(viewModel = viewModel){}
 }

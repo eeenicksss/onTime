@@ -64,6 +64,8 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.dagger)
     implementation(libs.androidx.navigation.compose)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.junit.junit)
     kapt(libs.dagger.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
