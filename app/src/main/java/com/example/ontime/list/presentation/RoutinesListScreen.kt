@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -50,7 +51,6 @@ fun RoutinesListScreen(
                     routine = routine,
                     onDeleteClick = { viewModel.deleteRoutine(routine.id) },
                     onStartClick = {
-                        Log.d("RoutinesListActivity", "onStartClick invoked for routine ID: ${routine.id}")
                         onStartRoutineClick(routine.id)
                     }
                 )
@@ -92,7 +92,7 @@ fun RoutineItem(
             Text(
                 text = "${routine.tasks.size} tasks",
                 color = colorResource(R.color.gray)
-                )
+            )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(

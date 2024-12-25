@@ -133,7 +133,12 @@ fun TaskItem(
             TaskStatus.COMPLETED -> painterResource(R.drawable.completed)
             TaskStatus.SKIPPED -> painterResource(R.drawable.skipped)
         }
-        Image(painter, null, modifier = Modifier.clickable { onToggleTask(task) })
+        val contentDescription = when (task.status){
+            TaskStatus.UNCOMPLETED -> "UNCOMPLETED"
+            TaskStatus.COMPLETED -> "COMPLETED"
+            TaskStatus.SKIPPED -> "SKIPPED"
+        }
+        Image(painter, contentDescription, modifier = Modifier.clickable { onToggleTask(task) })
         Text(
             text = task.title,
             color = textColor,
