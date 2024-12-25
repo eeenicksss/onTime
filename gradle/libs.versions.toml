@@ -14,10 +14,6 @@ composeBom = "2024.04.01"
 navigationCompose = "2.8.4"
 coroutinesTest = "1.9.0"
 junitJunit = "4.12"
-cucumber-android = "7.18.1"
-cucumber-junit = "1.2.6"
-cucumber-java = "7.20.1"
-
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,11 +36,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest"}
-#junit-junit = { group = "junit", name = "junit", version.ref = "junitJunit" }
-cucumber-java = { group = "io.cucumber", name = "cucumber-java", version.ref = "cucumber-java" }
-cucumber-android = { group = "io.cucumber", name = "cucumber-android", version.ref = "cucumber-android" }
-cucumber-junit = { group = "io.cucumber", name = "cucumber-junit", version.ref = "cucumber-junit" }
-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
+junit-junit = { group = "junit", name = "junit", version.ref = "junitJunit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

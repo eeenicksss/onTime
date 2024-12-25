@@ -2,8 +2,6 @@ package com.example.ontime.list.data
 
 import com.example.ontime.list.domain.RoutinesListRepository
 import com.example.ontime.list.presentation.Routine
-import com.example.ontime.routine.presentation.Task
-import com.example.ontime.routine.presentation.TaskStatus
 
 class FakeRoutinesListRepository(): RoutinesListRepository {
     private val routines = mutableListOf<Routine>()

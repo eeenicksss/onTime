@@ -2,7 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("org.jetbrains.kotlin.kapt")
-    id("io.cucumber") apply false
 }
 
 android {
@@ -71,12 +70,8 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     //androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    androidTestImplementation(libs.cucumber.java) // Cucumber Java
-    androidTestImplementation(libs.cucumber.android) // Cucumber Android
-    androidTestImplementation(libs.cucumber.junit) // JUnit integration
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
