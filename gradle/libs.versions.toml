@@ -13,7 +13,10 @@ activityCompose = "1.9.2"
 composeBom = "2024.04.01"
 navigationCompose = "2.8.4"
 coroutinesTest = "1.9.0"
-junitJunit = "4.12"
+#junitJunit = "4.12"
+cucumberAndroid = "7.18.1"
+cucumberJunit = "7.18.1"
+cucumberJava = "7.20.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -22,7 +25,6 @@ dagger-compiler = { group = "com.google.dagger", name = "dagger-compiler", versi
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-#androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
@@ -36,7 +38,12 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest"}
-junit-junit = { group = "junit", name = "junit", version.ref = "junitJunit" }
+#junit-junit = { group = "junit", name = "junit", version.ref = "junitJunit" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+cucumber-java = { group = "io.cucumber", name = "cucumber-java8", version.ref = "cucumberJava"}
+cucumber-android = { group = "io.cucumber", name = "cucumber-android", version.ref = "cucumberAndroid" }
+cucumber-junit = { group = "io.cucumber", name = "cucumber-junit", version.ref = "cucumberJunit" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -16,6 +16,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "io.cucumber.android.runner.CucumberAndroidJUnitRunner"
+        testInstrumentationRunnerArguments["com.example.ontime"] = "true"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -69,11 +71,14 @@ dependencies {
     //testImplementation(libs.junit.junit)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
-    //androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+//    androidTestImplementation(libs.espresso.core)
+    androidTestImplementation(libs.cucumber.android)
+//    androidTestImplementation(libs.cucumber.junit)
+//    androidTestImplementation(libs.cucumber.java)
 }
 
 

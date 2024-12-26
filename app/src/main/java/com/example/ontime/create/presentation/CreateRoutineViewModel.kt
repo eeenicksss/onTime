@@ -39,8 +39,7 @@ open class CreateRoutineViewModel(
         val duration = _newTaskDuration.value.toIntOrNull()
         if (
             duration != null &&
-            duration > 0 &&
-            duration <= 120 && // 2 hours limit per task
+            duration in 1..120 && // 2 hours limit per task
             _newTaskTitle.value.isNotBlank() &&
             tasks.value.sumOf{it.durationMins} + duration <= 1440 //24 hour maximum length of routine
             ) {
