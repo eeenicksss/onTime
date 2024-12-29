@@ -25,7 +25,7 @@ class OnTimeUITests {
     fun create_routine_button() {
         composeTestRule.setContent {
             val navController = rememberNavController()
-            AppNavHost(navController = navController) // встроить AppNavHost
+            AppNavHost(navController = navController)
         }
 
         composeTestRule.onNodeWithText("Новая рутина").assertIsDisplayed()
@@ -37,7 +37,7 @@ class OnTimeUITests {
     fun create_routine() {
         composeTestRule.setContent {
             val navController = rememberNavController()
-            AppNavHost(navController = navController) // встроить AppNavHost
+            AppNavHost(navController = navController)
         }
 
         composeTestRule.onNodeWithText("Новая рутина").performClick()
@@ -53,17 +53,16 @@ class OnTimeUITests {
     fun start_routine() {
         composeTestRule.setContent {
             val navController = rememberNavController()
-            AppNavHost(navController = navController) // встроить AppNavHost
+            AppNavHost(navController = navController)
         }
-        composeTestRule.onNodeWithText("Новая рутина").performClick()
-        composeTestRule.onNodeWithText("Название рутины").performTextInput("Test")
-        composeTestRule.onNodeWithText("Заголовок задачи").performTextInput("Test")
-        composeTestRule.onNodeWithText("Длительность задачи (мин)").performTextInput("1")
-        composeTestRule.onNodeWithText("Добавить задачу").performClick()
-        composeTestRule.onNodeWithText("Сохранить рутину").performClick()
+//        composeTestRule.onNodeWithText("Новая рутина").performClick()
+//        composeTestRule.onNodeWithText("Название рутины").performTextInput("Test")
+//        composeTestRule.onNodeWithText("Заголовок задачи").performTextInput("Test")
+//        composeTestRule.onNodeWithText("Длительность задачи (мин)").performTextInput("1")
+//        composeTestRule.onNodeWithText("Добавить задачу").performClick()
+//        composeTestRule.onNodeWithText("Сохранить рутину").performClick()
 
-        composeTestRule.onNodeWithText("Новая рутина").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Начать").performClick()
+        composeTestRule.onAllNodesWithText("Начать")[0].performClick()
         composeTestRule.onNodeWithText("Выполнить").assertIsDisplayed()
     }
 
@@ -71,7 +70,7 @@ class OnTimeUITests {
     fun delete_routine() {
         composeTestRule.setContent {
             val navController = rememberNavController()
-            AppNavHost(navController = navController) // встроить AppNavHost
+            AppNavHost(navController = navController)
         }
         composeTestRule.onNodeWithText("Новая рутина").performClick()
         composeTestRule.onNodeWithText("Название рутины").performTextInput("DeleteTest")

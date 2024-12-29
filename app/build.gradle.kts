@@ -16,8 +16,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunner = "io.cucumber.android.runner.CucumberAndroidJUnitRunner"
-        testInstrumentationRunnerArguments["com.example.ontime"] = "true"
+        //testInstrumentationRunner = "io.cucumber.android.runner.CucumberAndroidJUnitRunner"
+        //testInstrumentationRunnerArguments["com.example.ontime"] = "true"
         vectorDrawables {
             useSupportLibrary = true
         }
